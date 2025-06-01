@@ -1,4 +1,4 @@
-package gestion.pack.panels;
+package gestion_note.panels;
 
 import javax.swing.JPanel;
 
