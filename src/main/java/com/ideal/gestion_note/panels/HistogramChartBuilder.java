@@ -1,4 +1,4 @@
-package gestion_note.panels;
+package com.ideal.gestion_note.panels;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;

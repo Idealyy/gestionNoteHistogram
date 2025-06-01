@@ -1,4 +1,4 @@
-package gestion_note.model;
+package com.ideal.gestion_note.model;
 
 import lombok.*;
 

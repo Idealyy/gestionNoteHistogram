@@ -1,8 +1,8 @@
-package gestion_note.panels;
+package com.ideal.gestion_note.panels;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import gestion_note.model.Student;
+import com.ideal.gestion_note.model.Student;
 
 import java.lang.reflect.Type;
 import java.util.List;
