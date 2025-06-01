@@ -1,4 +1,4 @@
-package gestion.pack.charts;
+package gestion.pack.panels;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;

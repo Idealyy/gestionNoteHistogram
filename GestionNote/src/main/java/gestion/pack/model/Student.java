@@ -15,5 +15,11 @@ public class Student {
     private int num;
     private String nom;
     private double moyenne;
+
+    public String getObs() {
+        return moyenne >= 10
+                ? "Admis"
+                : moyenne >= 5 ? "Redouble" : "Exclus";
+    }
 }
 
