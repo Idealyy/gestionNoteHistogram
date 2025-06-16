@@ -1,7 +1,5 @@
 package com.ideal.gestion_note.panels.table;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import com.ideal.gestion_note.interfaces.Updatable;
 import com.ideal.gestion_note.model.Student;
 import com.ideal.gestion_note.services.ResumeService;
@@ -9,7 +7,6 @@ import com.ideal.gestion_note.services.StudentService;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
-import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
@@ -105,18 +102,10 @@ public class TablePanel extends javax.swing.JPanel {
         jLabel4.setText("Moyenne de classe :");
 
         addBtn.setText("Ajouter");
-        addBtn.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                addBtnActionPerformed(evt);
-            }
-        });
+        addBtn.addActionListener(this::addBtnActionPerformed);
 
         deleteBtn.setText("Supprimer");
-        deleteBtn.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                deleteBtnActionPerformed(evt);
-            }
-        });
+        deleteBtn.addActionListener(this::deleteBtnActionPerformed);
 
         updateMoyenneClasse();
 
@@ -213,12 +202,6 @@ public class TablePanel extends javax.swing.JPanel {
         } else {
             showErrorMessageDialog("Sélectionne une ligne à supprimer.");
         }
-    }
-
-    private List<Student> parseToStudent(String json) {
-        Type listType = new TypeToken<List<Student>>() {
-        }.getType();
-        return new Gson().fromJson(json, listType);
     }
 
     private void addRow(Student s) {
