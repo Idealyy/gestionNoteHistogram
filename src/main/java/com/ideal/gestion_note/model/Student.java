@@ -1,5 +1,6 @@
 package com.ideal.gestion_note.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 
 /**
@@ -10,6 +11,7 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @ToString
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Student {
     private String numEt;
     private String nom;
@@ -21,10 +23,10 @@ public class Student {
         setMoyenne(moyenne);
     }
 
-    public String getObs() {
+    public Obs getObservation() {
         return moyenne >= 10
-                ? "Admis"
-                : moyenne >= 5 ? "Redouble" : "Exclus";
+                ? Obs.Admis
+                : moyenne >= 5 ? Obs.Redouble : Obs.Exclus;
     }
 
     public void setMoyenne(double moyenne) {

@@ -18,24 +18,10 @@ public class StudentService {
 
         if (response.isSuccess()) {
             try {
-                return mapper.readValue(response.getBody(), new TypeReference<List<Student>>() {
+                return mapper.readValue(response.getBody(), new TypeReference<>() {
                 });
             } catch (Exception e) {
                 throw new RuntimeException("Erreur de parsing JSON (findAll)", e);
-            }
-        } else {
-            throw new RuntimeException(response.getBody());
-        }
-    }
-
-    public Student findByNumEt(String numEt) {
-        HttpResponse<String> response = Unirest.get(BASE_URL + "/" + numEt).asString();
-
-        if (response.isSuccess()) {
-            try {
-                return mapper.readValue(response.getBody(), Student.class);
-            } catch (Exception e) {
-                throw new RuntimeException("Erreur de parsing JSON (findByNumEt)", e);
             }
         } else {
             throw new RuntimeException(response.getBody());
@@ -59,7 +45,7 @@ public class StudentService {
         }
     }
 
-    public Student update(String numEt, Student etudiant) {
+    public void update(String numEt, Student etudiant) {
         HttpResponse<String> response = Unirest.put(BASE_URL + "/" + numEt)
                 .header("Content-Type", "application/json")
                 .body(etudiant)
@@ -67,7 +53,7 @@ public class StudentService {
 
         if (response.isSuccess()) {
             try {
-                return mapper.readValue(response.getBody(), Student.class);
+                mapper.readValue(response.getBody(), Student.class);
             } catch (Exception e) {
                 throw new RuntimeException("Erreur de parsing JSON (update)", e);
             }
