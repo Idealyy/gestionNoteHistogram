@@ -1,5 +1,6 @@
-package com.ideal.gestion_note.panels;
+package com.ideal.gestion_note.panels.graph;
 
+import com.ideal.gestion_note.model.MoyennResume;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -7,15 +8,17 @@ import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.chart.renderer.category.BarRenderer;
 import javax.swing.*;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 public class HistogramChartBuilder {
 
-    public static JPanel createHistogramPanel(double[] data) {
+    public static JPanel createHistogramPanel(MoyennResume resume) {
         DefaultCategoryDataset dataset = new DefaultCategoryDataset();
 
-        // data[0] = min, data[1] = moyenne, data[2] = max
-        dataset.addValue(data[0], "Moyennes", "Minimale");
-        dataset.addValue(data[2], "Moyennes", "Maximale");
+        dataset.addValue(BigDecimal.valueOf(resume.getMoyenneClasse()).setScale(2, RoundingMode.HALF_UP), "Moyenne", "Classe");
+        dataset.addValue(resume.getMoyenneMin(), "Moyenne", "Minimale");
+        dataset.addValue(resume.getMoyenneMax(), "Moyenne", "Maximale");
 
         JFreeChart chart = ChartFactory.createBarChart(
                 "Statistiques des moyennes",

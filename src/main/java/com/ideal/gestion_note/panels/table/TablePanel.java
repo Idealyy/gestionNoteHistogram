@@ -1,93 +1,57 @@
-package com.ideal.gestion_note.panels;
+package com.ideal.gestion_note.panels.table;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.ideal.gestion_note.interfaces.Updatable;
 import com.ideal.gestion_note.model.Student;
+import com.ideal.gestion_note.services.StudentService;
 
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import java.lang.reflect.Type;
 import java.util.List;
-import javax.swing.JOptionPane;
-import javax.swing.table.DefaultTableModel;
 
 /**
  * @author ideal
  */
 public class TablePanel extends javax.swing.JPanel {
 
-    DefaultTableModel model = new DefaultTableModel(
-            new String[] {
-                    "Numéro",
-                    "Nom",
-                    "Moyenne",
-                    "Observation"
-            }, 0) {
+    DefaultTableModel model = new DefaultTableModel(TableColumn.values(), 0) {
         @Override
         public boolean isCellEditable(int row, int column) {
-            return column != 3;
+            return column != TableColumn.Observation.getIndex() && column != TableColumn.NumEt.getIndex();
         }
     };
+    private final StudentService service = new StudentService();
+    private final Updatable observer;
 
     /**
-     * {@link Deprecated}
-     * Todo
-     * A service layer will be implemented to get moyenne stats from REST
+     * Creates new form of TablePanel
      */
-    public double[] getMoyenneStats() {
-        int rowCount = model.getRowCount();
-        if (rowCount == 0) return new double[]{0, 0, 0};
-
-        double min = Double.MAX_VALUE;
-        double max = Double.MIN_VALUE;
-        double sum = 0;
-
-        for (int i = 0; i < rowCount; i++) {
-            Object val = model.getValueAt(i, 2);
-            if (val != null) {
-                try {
-                    double moyenne = Double.parseDouble(val.toString());
-                    min = Math.min(min, moyenne);
-                    max = Math.max(max, moyenne);
-                    sum += moyenne;
-                } catch (NumberFormatException ignored) {
-                }
-            }
-        }
-
-        double avg = sum / rowCount;
-        return new double[]{min, avg, max};
-    }
-
-    /**
-     * Creates new form TablePanel
-     */
-    public TablePanel() {
+    public TablePanel(Updatable observer) {
+        this.observer = observer;
         initComponents();
         initTable();
+        setListeners();
+    }
 
+    private void setListeners() {
         model.addTableModelListener(e -> {
             int row = e.getFirstRow();
             int column = e.getColumn();
             if (row != -1 && column != -1) {
                 Object value = model.getValueAt(row, column);
                 Student student = updateCell(row, column, value.toString());
-                // TODO: Appel API PUT ici pour mettre à jour la moyenne et l'observation
-                System.out.println("Cellule {r=" + row + ", c=" + column + "} modifiée : " + student.toString());
+                if (student != null) {
+                    service.update(student.getNumEt(), student);
+                    observer.update();
+                }
             }
         });
-
     }
 
     private void initTable() {
-        dataTable.getColumnModel().getColumn(0).setHeaderValue("NumEt");
-        dataTable.getColumnModel().getColumn(1).setHeaderValue("Nom");
-        dataTable.getColumnModel().getColumn(2).setHeaderValue("Moyenne");
-        dataTable.getColumnModel().getColumn(3).setHeaderValue("Observation");
-        dataTable.getTableHeader().repaint();
-
-        // TODO
-        // fetch webservice from here
-        String json = "[{\"numEt\": 1, \"nom\": \"Alice\", \"moyenne\": 14.5}, {\"numEt\": 2, \"nom\": \"Bob\", \"moyenne\": 12.75}]";
-        addRows(parseToStudent(json));
+        addRows(service.findAll());
         dataTable.setModel(model);
     }
 
@@ -137,18 +101,10 @@ public class TablePanel extends javax.swing.JPanel {
         jLabel4.setText("Moyenne de classe :");
 
         addBtn.setText("Ajouter");
-        addBtn.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                addBtnActionPerformed(evt);
-            }
-        });
+        addBtn.addActionListener(this::addBtnActionPerformed);
 
         deleteBtn.setText("Supprimer");
-        deleteBtn.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                deleteBtnActionPerformed(evt);
-            }
-        });
+        deleteBtn.addActionListener(this::deleteBtnActionPerformed);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -207,78 +163,91 @@ public class TablePanel extends javax.swing.JPanel {
         );
     }// </editor-fold>//GEN-END:initComponents
 
-    private void addBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addBtnActionPerformed
+    /**
+     * Save a student
+     */
+    private void addBtnActionPerformed(java.awt.event.ActionEvent evt) {
+        String numEt = (numTF.getText());
+        String nom = nameTF.getText();
         try {
-            String numEt = (numTF.getText());
-            String nom = nameTF.getText();
             double moyenne = Double.parseDouble(moyenneTF.getText());
-            Student student = new Student(numEt, nom, moyenne);
-            // TODO
-            //  save added data here
+            Student student = service.create(new Student(numEt, nom, moyenne));
             addRow(student);
-            resetTextFields();
+            observer.update();
         } catch (NumberFormatException ex) {
-            JOptionPane.showMessageDialog(null, "Moyenne invalide", "Erreur", JOptionPane.ERROR_MESSAGE);
+            showErrorMessageDialog("Moyenne invalide");
+        } catch (RuntimeException e) {
+            showErrorMessageDialog(e.getMessage());
         }
+        resetTextFields();
     }
 
     private void deleteBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteBtnActionPerformed
         int selectedRow = dataTable.getSelectedRow();
         if (selectedRow != -1) {
             String numEt = model.getValueAt(selectedRow, 0).toString(); // Numéro de l'étudiant
-            // TODO: Appel API DELETE ici pour supprimer l'étudiant avec ce numéro
-            model.removeRow(selectedRow);
+            if (showConfirmDialog("Etes vous sur de vouloir supprimer l'etudiant #" + numEt)) {
+                service.delete(numEt);
+                model.removeRow(selectedRow);
+                observer.update();
+            }
         } else {
-            JOptionPane.showMessageDialog(null, "Sélectionne une ligne à supprimer.");
+            showErrorMessageDialog("Sélectionne une ligne à supprimer.");
         }
     }
 
-    public List<Student> parseToStudent(String json) {
-        Type listType = new TypeToken<List<Student>>() {}.getType();
+    private List<Student> parseToStudent(String json) {
+        Type listType = new TypeToken<List<Student>>() {
+        }.getType();
         return new Gson().fromJson(json, listType);
     }
 
-    public void addRow (Student s) {
-        model.addRow(new Object[]{s.getNumEt(), s.getNom(), s.getMoyenne(), s.getObs()});
+    private void addRow(Student s) {
+        model.addRow(new Object[]{s.getNumEt(), s.getNom(), s.getMoyenne(), s.getObservation()});
     }
 
-    public void addRows(List<Student> students) {
+    private void addRows(List<Student> students) {
         for (Student student : students) addRow(student);
     }
 
-    public Student getRowAt(int row) {
+    private Student getRowAt(int row) {
         if (row == -1)
             return null;
         String numEt = model.getValueAt(row, 0).toString();
         String nom = model.getValueAt(row, 1).toString();
         double moyenne = Double.parseDouble(model.getValueAt(row, 2).toString());
-        return new Student(numEt, nom, moyenne);
+        try {
+            return new Student(numEt, nom, moyenne);
+        } catch (NumberFormatException e) {
+            showErrorMessageDialog("La moyenne doit etre entre 0 et 20");
+            return null;
+        }
     }
 
-    public Student updateCell(int row, int col, String val) {
+    private Student updateCell(int row, int col, String val) {
         if (row == -1 || col == -1) {
             return null;
         }
         Student student = getRowAt(row);
+        if (student == null) {
+            return null;
+        }
         switch (col) {
-            case 0 : {
+            case 0: {
                 student.setNumEt(val);
                 break;
-            } case 1 : {
+            }
+            case 1: {
                 student.setNom(val);
                 break;
-            } case 2 : {
+            }
+            case 2: {
                 try {
                     student.setMoyenne(Double.parseDouble(val));
-                    model.setValueAt(student.getObs(), row, 3);
+                    model.setValueAt(student.getObservation(), row, 3);
                     break;
                 } catch (NumberFormatException exception) {
-                    JOptionPane.showMessageDialog(
-                            null,
-                            "Moyenne invalide",
-                            "Erreur",
-                            JOptionPane.ERROR_MESSAGE
-                    );
+                    showErrorMessageDialog("Moyenne invalide");
                 }
             }
         }
@@ -289,6 +258,25 @@ public class TablePanel extends javax.swing.JPanel {
         numTF.setText("");
         nameTF.setText("");
         moyenneTF.setText("");
+    }
+
+    private void showErrorMessageDialog(String message) {
+        JOptionPane.showMessageDialog(
+                dataTable,
+                message == null ? "Erreur" : message,
+                "Erreur",
+                JOptionPane.ERROR_MESSAGE
+        );
+    }
+
+    private boolean showConfirmDialog(String message) {
+        int result = JOptionPane.showConfirmDialog(
+                dataTable,
+                message == null ? "Êtes-vous sûr ?" : message,
+                "Confirmation",
+                JOptionPane.YES_NO_OPTION
+        );
+        return result == JOptionPane.YES_OPTION;
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
