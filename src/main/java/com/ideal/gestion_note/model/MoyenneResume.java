@@ -8,7 +8,7 @@ import lombok.*;
 @Getter
 @Setter
 @ToString
-public class MoyennResume {
+public class MoyenneResume {
     private Double moyenneClasse;
     private Double moyenneMin;
     private Double moyenneMax;
