@@ -11,7 +11,7 @@ public class ResumeService {
     private static final String BASE_URL = "http://localhost:8085/api/views/etudiant-moyenne";
     private static final ObjectMapper mapper = new ObjectMapper();
 
-    public MoyenneResume getResume() {
+    public static MoyenneResume getResume() {
         HttpResponse<String> response = Unirest.get(BASE_URL).asString();
         if (response.isSuccess()) {
             try {

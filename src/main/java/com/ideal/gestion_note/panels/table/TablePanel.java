@@ -4,11 +4,14 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.ideal.gestion_note.interfaces.Updatable;
 import com.ideal.gestion_note.model.Student;
+import com.ideal.gestion_note.services.ResumeService;
 import com.ideal.gestion_note.services.StudentService;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.lang.reflect.Type;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 
 /**
@@ -22,7 +25,6 @@ public class TablePanel extends javax.swing.JPanel {
             return column != TableColumn.Observation.getIndex() && column != TableColumn.NumEt.getIndex();
         }
     };
-    private final StudentService service = new StudentService();
     private final Updatable observer;
 
     /**
@@ -43,7 +45,8 @@ public class TablePanel extends javax.swing.JPanel {
                 Object value = model.getValueAt(row, column);
                 Student student = updateCell(row, column, value.toString());
                 if (student != null) {
-                    service.update(student.getNumEt(), student);
+                    StudentService.update(student.getNumEt(), student);
+                    updateMoyenneClasse();
                     observer.update();
                 }
             }
@@ -51,7 +54,7 @@ public class TablePanel extends javax.swing.JPanel {
     }
 
     private void initTable() {
-        addRows(service.findAll());
+        addRows(StudentService.findAll());
         dataTable.setModel(model);
     }
 
@@ -74,15 +77,15 @@ public class TablePanel extends javax.swing.JPanel {
         setBackground(new java.awt.Color(204, 204, 255));
 
         dataTable.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null}
-            },
-            new String [] {
-                "Title 1", "Title 2", "Title 3", "Title 4"
-            }
+                new Object[][]{
+                        {null, null, null, null},
+                        {null, null, null, null},
+                        {null, null, null, null},
+                        {null, null, null, null}
+                },
+                new String[]{
+                        "Title 1", "Title 2", "Title 3", "Title 4"
+                }
         ));
         dataTable.setCellSelectionEnabled(true);
         jScrollPane1.setViewportView(dataTable);
@@ -115,65 +118,65 @@ public class TablePanel extends javax.swing.JPanel {
             }
         });
 
-        moyenneClasse.setText("0");
+        updateMoyenneClasse();
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(31, 31, 31)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 609, Short.MAX_VALUE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(57, 57, 57)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel1)
-                            .addComponent(jLabel2)
-                            .addComponent(jLabel3))
-                        .addGap(40, 40, 40)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(nameTF, javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(numTF, javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(moyenneTF))
-                        .addGap(63, 63, 63)
-                        .addComponent(addBtn)
-                        .addGap(68, 68, 68)))
-                .addGap(40, 40, 40))
-            .addGroup(layout.createSequentialGroup()
-                .addGap(63, 63, 63)
-                .addComponent(jLabel4)
-                .addGap(42, 42, 42)
-                .addComponent(moyenneClasse, javax.swing.GroupLayout.PREFERRED_SIZE, 24, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(deleteBtn)
-                .addGap(106, 106, 106))
+                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addGroup(layout.createSequentialGroup()
+                                                .addGap(31, 31, 31)
+                                                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 609, Short.MAX_VALUE))
+                                        .addGroup(layout.createSequentialGroup()
+                                                .addGap(57, 57, 57)
+                                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                                        .addComponent(jLabel1)
+                                                        .addComponent(jLabel2)
+                                                        .addComponent(jLabel3))
+                                                .addGap(40, 40, 40)
+                                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                                        .addComponent(nameTF, javax.swing.GroupLayout.Alignment.LEADING)
+                                                        .addComponent(numTF, javax.swing.GroupLayout.Alignment.LEADING)
+                                                        .addComponent(moyenneTF))
+                                                .addGap(63, 63, 63)
+                                                .addComponent(addBtn)
+                                                .addGap(68, 68, 68)))
+                                .addGap(40, 40, 40))
+                        .addGroup(layout.createSequentialGroup()
+                                .addGap(63, 63, 63)
+                                .addComponent(jLabel4)
+                                .addGap(42, 42, 42)
+                                .addComponent(moyenneClasse, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(deleteBtn)
+                                .addGap(106, 106, 106))
         );
         layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addGap(23, 23, 23)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel1)
-                    .addComponent(numTF, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel2)
-                    .addComponent(nameTF, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(addBtn))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel3)
-                    .addComponent(moyenneTF, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(13, 13, 13)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 207, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel4)
-                    .addComponent(deleteBtn)
-                    .addComponent(moyenneClasse))
-                .addGap(14, 14, 14))
+                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                .addGap(23, 23, 23)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addComponent(jLabel1)
+                                        .addComponent(numTF, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addComponent(jLabel2)
+                                        .addComponent(nameTF, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(addBtn))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addComponent(jLabel3)
+                                        .addComponent(moyenneTF, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGap(13, 13, 13)
+                                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 207, Short.MAX_VALUE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addComponent(jLabel4)
+                                        .addComponent(deleteBtn)
+                                        .addComponent(moyenneClasse))
+                                .addGap(14, 14, 14))
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -185,8 +188,9 @@ public class TablePanel extends javax.swing.JPanel {
         String nom = nameTF.getText();
         try {
             double moyenne = Double.parseDouble(moyenneTF.getText());
-            Student student = service.create(new Student(numEt, nom, moyenne));
+            Student student = StudentService.create(new Student(numEt, nom, moyenne));
             addRow(student);
+            updateMoyenneClasse();
             observer.update();
         } catch (NumberFormatException ex) {
             showErrorMessageDialog("Moyenne invalide");
@@ -196,12 +200,13 @@ public class TablePanel extends javax.swing.JPanel {
         resetTextFields();
     }
 
-    private void deleteBtnActionPerformed(java.awt.event.ActionEvent evt) {                                          
+    private void deleteBtnActionPerformed(java.awt.event.ActionEvent evt) {
         int selectedRow = dataTable.getSelectedRow();
         if (selectedRow != -1) {
             String numEt = model.getValueAt(selectedRow, 0).toString(); // Numéro de l'étudiant
             if (showConfirmDialog("Etes vous sur de vouloir supprimer l'etudiant #" + numEt)) {
-                service.delete(numEt);
+                StudentService.delete(numEt);
+                updateMoyenneClasse();
                 model.removeRow(selectedRow);
                 observer.update();
             }
@@ -291,6 +296,16 @@ public class TablePanel extends javax.swing.JPanel {
                 JOptionPane.YES_NO_OPTION
         );
         return result == JOptionPane.YES_OPTION;
+    }
+
+    private void updateMoyenneClasse() {
+        moyenneClasse.setText(BigDecimal
+                .valueOf(ResumeService
+                        .getResume()
+                        .getMoyenneClasse())
+                .setScale(2, RoundingMode.HALF_UP)
+                .toString()
+        );
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
