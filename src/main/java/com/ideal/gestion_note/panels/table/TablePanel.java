@@ -180,13 +180,13 @@ public class TablePanel extends javax.swing.JPanel {
             Student student = StudentService.create(new Student(numEt, nom, moyenne));
             addRow(student);
             updateMoyenneClasse();
+            resetTextFields();
             observer.update();
         } catch (NumberFormatException ex) {
             showErrorMessageDialog("Moyenne invalide");
         } catch (RuntimeException e) {
             showErrorMessageDialog(e.getMessage());
         }
-        resetTextFields();
     }
 
     private void deleteBtnActionPerformed(java.awt.event.ActionEvent evt) {
