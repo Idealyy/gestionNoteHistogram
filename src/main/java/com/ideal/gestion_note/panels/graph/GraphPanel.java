@@ -9,7 +9,6 @@ import javax.swing.JPanel;
  */
 public class GraphPanel extends javax.swing.JPanel implements Updatable {
 
-    private final ResumeService service = new ResumeService();
     private JPanel histogram;
 
     public GraphPanel() {
@@ -30,7 +29,7 @@ public class GraphPanel extends javax.swing.JPanel implements Updatable {
         if (histogram != null) {
             this.remove(histogram);
         }
-        histogram = HistogramChartBuilder.createHistogramPanel(service.getResume());
+        histogram = HistogramChartBuilder.createHistogramPanel(ResumeService.getResume());
         this.add(histogram, java.awt.BorderLayout.CENTER);
         this.revalidate();
         this.repaint();
@@ -39,6 +38,5 @@ public class GraphPanel extends javax.swing.JPanel implements Updatable {
     @Override
     public void update() {
         refreshHistogram();
-        System.out.println("Graph updated: " + service.getResume());
     }
 }

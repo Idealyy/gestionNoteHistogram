@@ -1,6 +1,6 @@
 package com.ideal.gestion_note.panels.graph;
 
-import com.ideal.gestion_note.model.MoyennResume;
+import com.ideal.gestion_note.model.MoyenneResume;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -13,7 +13,7 @@ import java.math.RoundingMode;
 
 public class HistogramChartBuilder {
 
-    public static JPanel createHistogramPanel(MoyennResume resume) {
+    public static JPanel createHistogramPanel(MoyenneResume resume) {
         DefaultCategoryDataset dataset = new DefaultCategoryDataset();
 
         dataset.addValue(BigDecimal.valueOf(resume.getMoyenneClasse()).setScale(2, RoundingMode.HALF_UP), "Moyenne", "Classe");

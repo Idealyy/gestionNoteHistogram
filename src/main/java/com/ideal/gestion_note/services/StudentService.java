@@ -13,7 +13,7 @@ public class StudentService {
     private static final String BASE_URL = "http://localhost:8085/api/etudiant";
     private static final ObjectMapper mapper = new ObjectMapper();
 
-    public List<Student> findAll() {
+    public static List<Student> findAll() {
         HttpResponse<String> response = Unirest.get(BASE_URL).asString();
 
         if (response.isSuccess()) {
@@ -28,7 +28,7 @@ public class StudentService {
         }
     }
 
-    public Student create(Student etudiant) {
+    public static Student create(Student etudiant) {
         HttpResponse<String> response = Unirest.post(BASE_URL)
                 .header("Content-Type", "application/json")
                 .body(etudiant)
@@ -45,7 +45,7 @@ public class StudentService {
         }
     }
 
-    public void update(String numEt, Student etudiant) {
+    public static void update(String numEt, Student etudiant) {
         HttpResponse<String> response = Unirest.put(BASE_URL + "/" + numEt)
                 .header("Content-Type", "application/json")
                 .body(etudiant)
@@ -62,7 +62,7 @@ public class StudentService {
         }
     }
 
-    public void delete(String numEt) {
+    public static void delete(String numEt) {
         HttpResponse<String> response = Unirest.delete(BASE_URL + "/" + numEt).asString();
 
         if (!response.isSuccess()) {
